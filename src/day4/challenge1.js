@@ -17,89 +17,123 @@ const parse = (line) => {
     };
 }
 
-const data = [
-    '[1518-11-01 00:00] Guard #10 begins shift',
-    '[1518-11-01 00:30] falls asleep',
-    '[1518-11-03 00:24] falls asleep',
-    '[1518-11-01 00:55] wakes up',
-    '[1518-11-01 00:25] wakes up',
-    '[1518-11-02 00:40] falls asleep',
-    '[1518-11-02 00:50] wakes up',
-    '[1518-11-01 00:05] falls asleep',
-    '[1518-11-01 23:58] Guard #99 begins shift',
-    '[1518-11-04 00:36] falls asleep',
-    '[1518-11-03 00:05] Guard #10 begins shift',
-    '[1518-11-03 00:29] wakes up',
-    '[1518-11-04 00:46] wakes up',
-    '[1518-11-05 00:45] falls asleep',
-    '[1518-11-04 00:02] Guard #99 begins shift',
-    '[1518-11-05 00:03] Guard #99 begins shift',
-    '[1518-11-05 00:55] wakes up'];
+fs.readFile("input.txt", "utf8", function (err, contents) {
+    const data = contents.split('\n');
 
-const events = data.map((line) => {
-    return parse(line);
-});
+    const events = data.map((line) => {
+        return parse(line);
+    });
 
-const chronologicalEvents = events.sort((a, b) => {
-    return (a.when.getTime() - b.when.getTime());
-});
+    const chronologicalEvents = events.sort((a, b) => {
+        return (a.when.getTime() - b.when.getTime());
+    });
 
-const sleep_cycles = new Map();
+    const sleep_cycles = new Map();
 
-const sleep = new Map();
-let currentGuardId = '';
-chronologicalEvents.forEach((event, index) => {
-    switch(event.operation) {
-        case 'guard': {
-            currentGuardId = event.guardId;
-            if (!sleep.has(event.guardId)) {
-                sleep.set(event.guardId, 0);
-            }
-            break;
+    const sleep = new Map();
+    let currentGuardId = '';
+    chronologicalEvents.forEach((event, index) => {
+        switch (event.operation) {
+            case 'guard':
+                {
+                    currentGuardId = event.guardId;
+                    if (!sleep.has(event.guardId)) {
+                        sleep.set(event.guardId, 0);
+                    }
+                    break;
+                }
+            case 'wakes':
+                {
+                    const asleep = (event.when.getTime() - chronologicalEvents[index - 1].when.getTime()) / 60000;
+                    if (sleep.has(currentGuardId)) {
+                        const alreadyAsleep = sleep.get(currentGuardId);
+                        sleep.set(currentGuardId, alreadyAsleep + asleep);
+                    } else {
+                        sleep.set(currentGuardId, asleep);
+                    }
+
+                    if (sleep_cycles.has(currentGuardId)) {
+                        const cycles = sleep_cycles.get(currentGuardId);
+                        cycles.push({
+                            begin: chronologicalEvents[index - 1].when,
+                            end: event.when
+                        });
+                    } else {
+                        sleep_cycles.set(currentGuardId, [{
+                            begin: chronologicalEvents[index - 1].when,
+                            end: event.when
+                        }]);
+                    }
+                }
         }
-        case 'wakes': {
-            const asleep = (event.when.getTime() - chronologicalEvents[index - 1].when.getTime()) / 60000;
-            if (sleep.has(currentGuardId)) {
-                const alreadyAsleep = sleep.get(currentGuardId);
-                sleep.set(currentGuardId, alreadyAsleep + asleep);
-            } else {
-                sleep.set(currentGuardId, asleep);
-            }
+    });
 
-            if (sleep_cycles.has(currentGuardId)) {
-                const cycles = sleep_cycles.get(currentGuardId);
-                cycles.push({begin: chronologicalEvents[index - 1].when, end: event.when});
-            } else {
-                sleep_cycles.set(currentGuardId, [{begin: chronologicalEvents[index - 1].when, end: event.when}]);
-            }
+    let max = 0;
+    let maxGuardId = '';
+
+    sleep.forEach((value, key) => {
+        if (value > max) {
+            max = value;
+            maxGuardId = key;
+        }
+    });
+
+    const cycles = sleep_cycles.get(maxGuardId);
+    // console.log(cycles);
+
+    const rows = new Array(cycles.length);
+    for (let c = 0; c < rows.length; c++) {
+        rows[c] = new Array(180);
+        for (let t = 0; t < 180; t++) {
+            rows[c][t] = '.';
         }
     }
+
+    const span_minutes = (b, e) => {
+        return {
+            begin: b.getHours() === 23 ? b.getMinutes() : 60 + b.getMinutes(),
+            end: e.getHours() === 23 ? e.getMinutes() : 60 + e.getMinutes()
+        };
+    };
+
+    cycles.forEach((cycle, index) => {
+        span = span_minutes(cycle.begin, cycle.end);
+        
+        for (let t = span.begin; t < span.end; t++) {
+            rows[index][t] = '#';
+        }
+    });
+
+    const most_asleep = new Map();
+
+    rows.forEach((row, index) => {
+        for (let m = 0; m < row.length; m++) {
+            if (row[m] === '#') {
+                for (let n = index + 1; n < rows.length; n++) {
+                    if (rows[n][m] === '#') {
+                        if (most_asleep.has(m)) {
+                            const count = most_asleep.get(m);
+                            most_asleep.set(m, count + 1);
+                        } else {
+                            most_asleep.set(m, 1);
+                        }
+                    }
+                }
+            }
+        }
+    })
+
+    let maxMinutes = 0;
+    let maxMinute = 0;
+
+    console.log(most_asleep);
+
+    most_asleep.forEach((v,k) => {
+        if (v > maxMinutes) {
+            maxMinutes = v;
+            maxMinute = k;
+        }
+    })
+
+    console.log('guard with id: ', maxGuardId, ' slept for ', max, ' minutes; most optimal minute is: ', maxMinute);
 });
-
-let max = 0;
-let maxGuardId = '';
-
-sleep.forEach((value, key) => {
-    if (value > max) {
-        max = value;
-        maxGuardId = key;
-    }
-});
-
-console.log('max guard id: ', maxGuardId);
-
-const cycles = sleep_cycles.get('Guard #10');
-cycles.forEach((cycle, index) => {
-    for (let c = index + 1; c < cycles.length; c++) {
-        const nextCycle = cycles[c];
-
-        if (cycle.begin.getDay)
-    }
-});
-
-// fs.readFile("input.txt", "utf8", function(err, contents) {
-//     const log = contents.split('\n');
-//     log.forEach(line => {
-
-//     });
-// });
