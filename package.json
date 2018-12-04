@@ -1,0 +1,26 @@
+{
+  "name": "aoc18",
+  "version": "1.0.0",
+  "description": "advent of code 2018",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine --config=./jasmine.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/klaasjs/aoc18.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/klaasjs/aoc18/issues"
+  },
+  "homepage": "https://github.com/klaasjs/aoc18#readme",
+  "devDependencies": {
+    "jasmine": "^3.3.0",
+    "mocha": "^5.2.0"
+  },
+  "dependencies": {
+    "moment": "^2.22.2"
+  }
+}

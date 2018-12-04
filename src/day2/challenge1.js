@@ -1,5 +1,21 @@
+var exports = module.exports = {};
+
 const fs = require("fs");
 const seen = new Map();
+
+exports.char_frequency = (s) => {
+    const result = {};
+    for (let i = 0; i < s.length; i++) {
+        const c = s.charAt(i);
+        if (result[c]) {
+            result[c] = result[c] + 1;
+        } else {
+            result[c] = 1;
+        }
+    }
+
+    return result;
+}
 
 fs.readFile("ids.txt", "utf8", function(err, contents) {
     let count2 = 0, count3 = 0;
