@@ -90,7 +90,7 @@ console.log('max guard id: ', maxGuardId);
 
 const cycles = sleep_cycles.get('Guard #10');
 cycles.forEach((cycle, index) => {
-    for (let c = index + 1; c < cycles.lenght; c++) {
+    for (let c = index + 1; c < cycles.length; c++) {
         const nextCycle = cycles[c];
 
         if (cycle.begin.getDay)
