@@ -45,14 +45,6 @@ const solve = (coordinates) => {
     console.log('it occured ', count('#', map), ' times.');
 };
 
-// solve([
-//       {x: 1, y: 1}, 
-//       {x: 1, y: 6}, 
-//       {x: 8, y: 3}, 
-//       {x: 3, y: 4}, 
-//       {x: 5, y: 5}, 
-//       {x: 8, y: 9}  
-// ]);
 
 fs.readFile("input.txt", "utf8", function (err, contents) {
     const data = contents.split('\n');
