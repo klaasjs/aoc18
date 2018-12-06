@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const count = (needle, haystack, bb) => {
+const count = (needle, haystack) => {
     let c = 0;
 
     for (let y = 0; y < haystack.length; y++) {
@@ -27,7 +27,6 @@ const is_region = (candidate, coordinates, max) => {
     return sum < max;
 }
 
-
 const solve = (coordinates) => {
     const SIZE = 1000;
     const map = [];
@@ -44,7 +43,6 @@ const solve = (coordinates) => {
 
     console.log('it occured ', count('#', map), ' times.');
 };
-
 
 fs.readFile("input.txt", "utf8", function (err, contents) {
     const data = contents.split('\n');
