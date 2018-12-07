@@ -2,29 +2,36 @@
 const fs = require('fs');
 
 (function() {
-    const parse = (data) => {
-        const map = new Map();
+    const parse = (line) => {
+        return {
+            finished: line.substr(5, 1),
+            begin: line.substr(36, 1)
+        };
+    }
+
+    const add_or_append = (map, key, value) => {
+        if (map.has(key)) {
+            const map_value = map.get(key);
+            map_value.push(value);
+            map_value.sort();
+        } else {
+            map.set(key, [value]);
+        }
+    }
+
+    const solve = (data) => {
+        const map_finished_begin = new Map();
+        const map_begin_finished = new Map();
 
         data.forEach(line => {
-            const sf = line.substr(5,1);
-            const sb = line.substr(36,1);
-
-            if (map.has(sf)) {
-                const v = map.get(sf);
-                v.push(sb);
-                v.sort();
-            } else {
-                map.set(sf, [sb]);
-            }
+            const rule = parse(line);
+            add_or_append(map_finished_begin, rule.finished, rule.begin);
+            add_or_append(map_begin_finished, rule.begin, rule.finished);
         });
 
-        return map;
+        console.log(map_finished_begin);
+        console.log(map_begin_finished);
     };
-
-    const solve = (d) => {
-        const m = parse(d);
-        console.log('m', m);
-    }
 
     const data = [
         'Step C must be finished before step A can begin.',
@@ -37,6 +44,11 @@ const fs = require('fs');
     ];
 
     solve(data);
+
+    // fs.readFile("input.txt", "utf8", function (err, contents) {
+    //     const data = contents.split('\n');
+    //     solve(data);
+    // });
 })();
 
 
